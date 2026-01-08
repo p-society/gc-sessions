@@ -1,53 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { MatchState } from './state.schema';
+import { GlobalService } from 'src/common/global-service';
+import { MatchState, MatchStateDocument } from './state.schema';
 import { CreateMatchStateDtoType } from './state.dto';
 
 @Injectable()
-export class MatchStateService {
+export class MatchStateService extends GlobalService<
+  MatchState,
+  MatchStateDocument
+> {
   constructor(
     @InjectModel(MatchState.name)
-    private matchStateModel: Model<MatchState>,
-  ) {}
-
-  async create(
-    createMatchStateDto: CreateMatchStateDtoType,
-  ): Promise<MatchState> {
-    const createdState = new this.matchStateModel(createMatchStateDto);
-    return createdState.save();
-  }
-
-  async findAll(): Promise<MatchState[]> {
-    return this.matchStateModel.find().exec();
-  }
-
-  async findOne(id: string): Promise<MatchState> {
-    const state = await this.matchStateModel.findById(id).exec();
-    if (!state) {
-      throw new NotFoundException(`Match state with ID ${id} not found`);
-    }
-    return state;
-  }
-
-  async update(
-    id: string,
-    updateMatchStateDto: Partial<CreateMatchStateDtoType>,
-  ): Promise<MatchState> {
-    const updatedState = await this.matchStateModel
-      .findByIdAndUpdate(id, updateMatchStateDto, { new: true })
-      .exec();
-    if (!updatedState) {
-      throw new NotFoundException(`Match state with ID ${id} not found`);
-    }
-    return updatedState;
-  }
-
-  async remove(id: string): Promise<void> {
-    const result = await this.matchStateModel.findByIdAndDelete(id).exec();
-    if (!result) {
-      throw new NotFoundException(`Match state with ID ${id} not found`);
-    }
+    private matchStateModel: Model<MatchStateDocument>,
+  ) {
+    super(matchStateModel);
   }
 
   // Additional methods specific to match state

@@ -1,6 +1,9 @@
 // match-format.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { SoftDeleteSchema } from 'src/common/soft-delete-schema';
 import { Document } from 'mongoose';
+
+export type MatchFormatDocument = MatchFormat & Document;
 
 interface PenaltyAction {
   type: string;
@@ -20,7 +23,7 @@ interface ExtraTime {
 }
 
 @Schema({ timestamps: true })
-export class MatchFormat extends Document {
+export class MatchFormat extends SoftDeleteSchema {
   @Prop({ required: true })
   totalDuration: number;
 

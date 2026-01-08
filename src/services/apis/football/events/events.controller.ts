@@ -8,11 +8,15 @@ import {
   Param,
   Query,
   NotFoundException,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { MatchEventService } from './events.service';
 import { CreateMatchEventDtoType } from './events.dto';
-import { AdminGuard } from '../admin.guard';
-import { UseGuards } from '@nestjs/common';
+import { RolesGuard } from '../../users/roles.guard';
+import { Roles } from '../../users/decorator/roles.decorator';
+import { UserRole } from '../../users/constants/user-role';
+import { AuthGuard } from '../../auth/auth.guard';
 
 @Controller('football')
 export class FootballEventController {
@@ -55,7 +59,8 @@ export class FootballEventController {
   }
 
   @Post(':matchId/event')
-  @UseGuards(AdminGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   createEvent(
     @Param('matchId') matchId: string,
     @Body() createEventDto: CreateMatchEventDtoType,
@@ -65,21 +70,23 @@ export class FootballEventController {
       matchId,
       timestamp: new Date(),
     };
-    return this.eventService.create(eventWithMatchId);
+    return this.eventService._create(eventWithMatchId);
   }
 
   @Patch('event/:eventId')
-  @UseGuards(AdminGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   updateEvent(
     @Param('eventId') eventId: string,
     @Body() updateEventDto: Partial<CreateMatchEventDtoType>,
   ) {
-    return this.eventService.update(eventId, updateEventDto);
+    return this.eventService._patch(eventId, updateEventDto);
   }
 
   @Delete('event/:eventId')
-  @UseGuards(AdminGuard)
-  removeEvent(@Param('eventId') eventId: string) {
-    return this.eventService.remove(eventId);
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  removeEvent(@Param('eventId') eventId: string, @Req() req: any) {
+    return this.eventService._remove(eventId, {}, req.user);
   }
 }

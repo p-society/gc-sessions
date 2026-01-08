@@ -1,7 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { SoftDeleteSchema } from 'src/common/soft-delete-schema';
 import { Document } from 'mongoose';
 
+export type MatchStateDocument = MatchState & Document;
+
 // Interfaces for nested structures
+
 interface Score {
   home: number;
   away: number;
@@ -89,28 +93,9 @@ interface TeamStats {
 }
 
 @Schema({ timestamps: true })
-export class MatchState extends Document {
+export class MatchState extends SoftDeleteSchema {
   @Prop({
-    type: {
-      first: {
-        type: Object,
-        required: true,
-      },
-      second: {
-        type: Object,
-        required: true,
-      },
-      extraTime: {
-        firstHalf: { type: Object },
-        secondHalf: { type: Object },
-      },
-      penalties: {
-        home: [{ player: String, success: Boolean }],
-        away: [{ player: String, success: Boolean }],
-        outcome: String,
-        score: { home: Number, away: Number },
-      },
-    },
+    type: Object,
     required: true,
   })
   periods: {
@@ -129,28 +114,7 @@ export class MatchState extends Document {
   };
 
   @Prop({
-    type: {
-      home: {
-        name: String,
-        formation: String,
-        captain: String,
-        lineup: [Object],
-        substitutes: [Object],
-        substitutionsLeft: Number,
-        cards: Object,
-        injuries: [String],
-      },
-      away: {
-        name: String,
-        formation: String,
-        captain: String,
-        lineup: [Object],
-        substitutes: [Object],
-        substitutionsLeft: Number,
-        cards: Object,
-        injuries: [String],
-      },
-    },
+    type: Object,
     required: true,
   })
   teams: {
@@ -177,29 +141,7 @@ export class MatchState extends Document {
   };
 
   @Prop({
-    type: {
-      id: String,
-      competition: String,
-      venue: {
-        name: String,
-        city: String,
-      },
-      officials: {
-        referee: String,
-        assistants: [String],
-        fourthOfficial: String,
-        var: {
-          referee: String,
-          assistant: String,
-        },
-      },
-      weather: {
-        condition: String,
-        temperature: Number,
-      },
-      status: String,
-      minute: Number,
-    },
+    type: Object,
     required: true,
   })
   match: {
@@ -227,10 +169,7 @@ export class MatchState extends Document {
   };
 
   @Prop({
-    type: {
-      home: Object,
-      away: Object,
-    },
+    type: Object,
     required: true,
   })
   stats: {
@@ -239,14 +178,7 @@ export class MatchState extends Document {
   };
 
   @Prop({
-    type: {
-      winner: String,
-      type: String,
-      score: {
-        home: Number,
-        away: Number,
-      },
-    },
+    type: Object,
     required: true,
   })
   matchOutcome: {

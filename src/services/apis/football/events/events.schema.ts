@@ -1,7 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
+import { SoftDeleteSchema } from 'src/common/soft-delete-schema';
 import { TeamPlayer } from '../../teamPlayer/schemas/teamPlayer.schema';
-import { cardType, severityType } from './constants/FootballEnum';
+import { cardType, severityType } from './constants/football.enum';
+
+export type MatchEventDocument = MatchEvent & Document;
 
 // Common interfaces
 
@@ -58,7 +61,7 @@ type EventDetails =
   | GenericEventDetails;
 
 @Schema({ timestamps: true })
-export class MatchEvent extends Document {
+export class MatchEvent extends SoftDeleteSchema {
   @Prop({
     required: true,
     enum: ['goal', 'substitution', 'foul', 'injury', 'penalty', 'var_decision'],

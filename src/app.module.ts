@@ -21,6 +21,7 @@ import { TeamModule } from './services/apis/team/team.module';
 import { TeamPlayerModule } from './services/apis/teamPlayer/teamPlayer.module';
 import { GenerateOtpModule } from './services/apis/otp/generateOtp.module';
 import { MailerModule } from './services/apis/mailer/mailer.module';
+import { MatchGatewayModule } from './services/gateways/match/match.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { MailerModule } from './services/apis/mailer/mailer.module';
     ReactionsModule,
     GenerateOtpModule,
     MailerModule,
+    MatchGatewayModule,
   ],
   controllers: [AppController],
   providers: [

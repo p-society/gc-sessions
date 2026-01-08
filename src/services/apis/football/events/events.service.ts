@@ -4,6 +4,8 @@ import { Model } from 'mongoose';
 import { GlobalService } from 'src/common/global-service';
 import { MatchEvent, MatchEventDocument } from './events.schema';
 import { CreateMatchEventDtoType } from './events.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { MatchSocketEvents } from 'src/services/gateways/constants/match.events';
 
 @Injectable()
 export class MatchEventService extends GlobalService<
@@ -13,8 +15,47 @@ export class MatchEventService extends GlobalService<
   constructor(
     @InjectModel(MatchEvent.name)
     private matchEventModel: Model<MatchEventDocument>,
+    private readonly eventEmitter: EventEmitter2,
   ) {
     super(matchEventModel);
+  }
+
+  async create(createEventDto: CreateMatchEventDtoType): Promise<MatchEvent> {
+    const createdEvent = new this.matchEventModel(createEventDto);
+    const savedEvent = await createdEvent.save();
+
+    this.eventEmitter.emit(MatchSocketEvents.IN_MATCH_UPDATE, {
+      matchId: savedEvent.matchId,
+      type: savedEvent.type,
+      data: savedEvent,
+    });
+
+    return savedEvent;
+  }
+
+  async _create(
+    data: MatchEvent | MatchEvent[],
+    needsMulti: boolean | undefined = undefined,
+  ): Promise<MatchEvent | MatchEvent[]> {
+    const result = await super._create(data, needsMulti);
+
+    if (Array.isArray(result)) {
+      result.forEach((event) => {
+        this.eventEmitter.emit(MatchSocketEvents.IN_MATCH_UPDATE, {
+          matchId: event.matchId,
+          type: event.type,
+          data: event,
+        });
+      });
+    } else {
+      this.eventEmitter.emit(MatchSocketEvents.IN_MATCH_UPDATE, {
+        matchId: result.matchId,
+        type: result.type,
+        data: result,
+      });
+    }
+
+    return result;
   }
 
   async findByMatch(matchId: string): Promise<MatchEvent[]> {

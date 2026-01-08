@@ -5,11 +5,13 @@ import { Connection, connect } from 'mongoose';
 import { MatchStateService } from './state.service';
 import { MatchState, MatchStateSchema } from './state.schema';
 import { GlobalService } from 'src/common/global-service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('MatchStateService (Integration)', () => {
   let service: MatchStateService;
   let mongod: MongoMemoryServer;
   let mongoConnection: Connection;
+  let eventEmitter: EventEmitter2;
 
   beforeAll(async () => {
     mongod = await MongoMemoryServer.create();
@@ -23,10 +25,19 @@ describe('MatchStateService (Integration)', () => {
           { name: MatchState.name, schema: MatchStateSchema },
         ]),
       ],
-      providers: [MatchStateService],
+      providers: [
+        MatchStateService,
+        {
+          provide: EventEmitter2,
+          useValue: {
+            emit: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<MatchStateService>(MatchStateService);
+    eventEmitter = module.get<EventEmitter2>(EventEmitter2);
   });
 
   afterAll(async () => {
@@ -45,8 +56,14 @@ describe('MatchStateService (Integration)', () => {
 
   it('should create and retrieve a match state', async () => {
     const stateData = {
-      periods: { first: {}, second: {} },
-      teams: { home: {}, away: {} },
+      periods: {
+        first: { status: 'in_progress' },
+        second: { status: 'scheduled' },
+      },
+      teams: {
+        home: { name: 'Home Team' },
+        away: { name: 'Away Team' },
+      },
       match: { id: 'm1', status: 'scheduled', minute: 0 },
       stats: { home: {}, away: {} },
       matchOutcome: {
@@ -56,10 +73,10 @@ describe('MatchStateService (Integration)', () => {
       },
     };
 
-    // @ts-ignore - simplified for test
-    const created = await service._create(stateData);
-    expect(created).toBeDefined();
     // @ts-ignore
+    const created = await service.create(stateData as any);
+    expect(created).toBeDefined();
     expect(created.match.status).toBe('scheduled');
+    expect(eventEmitter.emit).toHaveBeenCalled();
   });
 });

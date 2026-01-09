@@ -4,11 +4,7 @@ import { FormatModule } from './format/format.module';
 import { EventsModule } from './events/events.module';
 
 @Module({
-  imports: [
-    StateModule, // Handles match states
-    FormatModule, // Handles match formats
-    EventsModule, // Handles match events
-  ],
+  imports: [StateModule, FormatModule, EventsModule],
   exports: [StateModule, FormatModule, EventsModule],
 })
 export class FootballModule {}

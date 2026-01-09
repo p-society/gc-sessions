@@ -13,7 +13,7 @@ export class ReactionStreamProcessor extends WorkerHost {
 
   async process(job: Job): Promise<any> {
     const {
-      data: { emoji, sport },
+      data: { emoji, sport, matchId },
     } = job as {
       data: ReactionStreamJob;
     };
@@ -22,6 +22,7 @@ export class ReactionStreamProcessor extends WorkerHost {
       payload: {
         emoji,
         sport,
+        matchId,
       },
     });
 

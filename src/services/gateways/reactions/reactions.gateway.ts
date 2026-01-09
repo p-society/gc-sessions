@@ -17,24 +17,28 @@ export class ReactionGateway {
 
   constructor(private readonly presenceGateway: PresenceGateway) {}
 
-  /**
-   * Triggered when the gateway is initialized.
-   */
   afterInit() {
     this.logInfo('WebSocket Gateway Initialized');
   }
 
   @OnEvent(ReactionSocketEvents.IN_REACTION_BROADCAST)
   broadcastReactionsToClients(event: ReactionsStreamEvent) {
-    this.presenceGateway.server.emit(
-      ReactionSocketEvents.PUBLIC_REACTION_BROADCAST,
-      event,
-    );
+    if (event.payload.matchId) {
+      this.presenceGateway.server
+        .to(`match:${event.payload.matchId}`)
+        .emit(ReactionSocketEvents.PUBLIC_REACTION_BROADCAST, event);
+    } else if (event.payload.sport) {
+      this.presenceGateway.server
+        .to(`sport:${event.payload.sport}`)
+        .emit(ReactionSocketEvents.PUBLIC_REACTION_BROADCAST, event);
+    } else {
+      this.presenceGateway.server.emit(
+        ReactionSocketEvents.PUBLIC_REACTION_BROADCAST,
+        event,
+      );
+    }
   }
-  /**
-   * Logs informational messages with a consistent format.
-   * @param message - The message to log.
-   */
+
   private logInfo(message: string): void {
     this.logger.log(`[INFO]: ${message}`);
   }

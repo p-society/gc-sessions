@@ -9,6 +9,7 @@ import {
   OnGatewayDisconnect,
   OnGatewayInit,
   SubscribeMessage,
+  MessageBody,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { SocketAuthMiddleware } from 'src/services/apis/auth/middlewares/socket.middleware';
@@ -117,7 +118,6 @@ export class PresenceGateway
    */
   @SubscribeMessage(PresenceSocketEvents.HEARTBEAT)
   async handleHeartbeat(@ConnectedSocket() client: SocketClient) {
-    // @ts-ignore
     const user = client['user']?._id;
 
     const USER_ID = String(client.user._id);
@@ -129,6 +129,26 @@ export class PresenceGateway
         `${new Date().toISOString()}`,
         100,
       );
+    }
+  }
+
+  @SubscribeMessage('join')
+  handleJoinRoom(
+    @ConnectedSocket() client: SocketClient,
+    @MessageBody() data: { room: string },
+  ) {
+    if (data.room) {
+      client.join(data.room);
+    }
+  }
+
+  @SubscribeMessage('leave')
+  handleLeaveRoom(
+    @ConnectedSocket() client: SocketClient,
+    @MessageBody() data: { room: string },
+  ) {
+    if (data.room) {
+      client.leave(data.room);
     }
   }
 

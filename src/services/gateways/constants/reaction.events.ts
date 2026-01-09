@@ -7,5 +7,6 @@ export interface ReactionsStreamEvent {
   payload: {
     sport: string;
     emoji: string;
+    matchId?: string;
   };
 }

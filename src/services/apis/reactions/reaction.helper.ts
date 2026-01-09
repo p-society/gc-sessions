@@ -1,6 +1,11 @@
-export function processReaction(reaction: { emoji: string; sport: string }): {
+export function processReaction(reaction: {
   emoji: string;
   sport: string;
+  matchId?: string;
+}): {
+  emoji: string;
+  sport: string;
+  matchId?: string;
 } {
   if (!reaction.emoji || typeof reaction.emoji !== 'string') {
     throw new Error('Invalid emoji: Must be a non-empty string');
@@ -13,5 +18,6 @@ export function processReaction(reaction: { emoji: string; sport: string }): {
   return {
     emoji: reaction.emoji.trim(),
     sport: reaction.sport.trim().toLowerCase(),
+    matchId: reaction.matchId,
   };
 }
